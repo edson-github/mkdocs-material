@@ -113,12 +113,22 @@ def _resolve(file: File, page: Page):
 # Create badge
 def _badge(icon: str, text: str = "", type: str = ""):
     classes = f"mdx-badge mdx-badge--{type}" if type else "mdx-badge"
-    return "".join([
-        f"<span class=\"{classes}\">",
-        *([f"<span class=\"mdx-badge__icon\">{icon}</span>"] if icon else []),
-        *([f"<span class=\"mdx-badge__text\">{text}</span>"] if text else []),
-        f"</span>",
-    ])
+    return "".join(
+        [
+            f'<span class=\"{classes}\">',
+            *(
+                [f"<span class=\"mdx-badge__icon\">{icon}</span>"]
+                if icon
+                else []
+            ),
+            *(
+                [f"<span class=\"mdx-badge__text\">{text}</span>"]
+                if text
+                else []
+            ),
+            "</span>",
+        ]
+    )
 
 # Create sponsors badge
 def _badge_for_sponsors(page: Page, files: Files):
@@ -138,8 +148,8 @@ def _badge_for_version(text: str, page: Page, files: Files):
     icon = "material-tag-outline"
     href = _resolve_path("conventions.md#version", page, files)
     return _badge(
-        icon = f"[:{icon}:]({href} 'Minimum version')",
-        text = f"[{text}]({_resolve_path(path, page, files)})" if spec else ""
+        icon=f"[:{icon}:]({href} 'Minimum version')",
+        spec=f"[{spec}]({_resolve_path(path, page, files)})" if spec else "",
     )
 
 # Create badge for version of Insiders

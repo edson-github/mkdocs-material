@@ -42,7 +42,7 @@ class OfflinePlugin(BasePlugin[OfflineConfig]):
 
         # Append iframe-worker to polyfills/shims
         config.extra["polyfills"] = config.extra.get("polyfills", [])
-        if not any("iframe-worker" in url for url in config.extra["polyfills"]):
+        if all("iframe-worker" not in url for url in config.extra["polyfills"]):
             script = "https://unpkg.com/iframe-worker/shim"
             config.extra["polyfills"].append(script)
 

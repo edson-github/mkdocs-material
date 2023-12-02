@@ -265,8 +265,8 @@ class BlogPlugin(BasePlugin[BlogConfig]):
         # is not already present, so we can remove footnotes or other content
         # from the excerpt without affecting the content of the excerpt
         if separator not in page.markdown:
-            path = page.file.src_path
             if self.config.post_excerpt == "required":
+                path = page.file.src_path
                 raise PluginError(
                     f"Couldn't find '{separator}' separator in '{path}'"
                 )
@@ -365,12 +365,8 @@ class BlogPlugin(BasePlugin[BlogConfig]):
         if self.config.draft:
             return False
 
-        # If a post was not explicitly marked or unmarked as draft, and the
-        # date should be taken into account, we automatically mark it as draft
-        # if the publishing date is in the future. This, of course, is opt-in
-        # and must be explicitly enabled by the author.
-        if not isinstance(post.config.draft, bool):
-            if self.config.draft_if_future_date:
+        if self.config.draft_if_future_date:
+            if not isinstance(post.config.draft, bool):
                 return post.config.date.created > datetime.now()
 
         # Post might be a draft
@@ -512,17 +508,11 @@ class BlogPlugin(BasePlugin[BlogConfig]):
 
     # Resolve siblings of a navigation item
     def _resolve_siblings(self, item: StructureItem, nav: Navigation):
-        if isinstance(item.parent, Section):
-            return item.parent.children
-        else:
-            return nav.items
+        return item.parent.children if isinstance(item.parent, Section) else nav.items
 
     # Resolve original page or view (e.g. for paginated views)
     def _resolve_original(self, page: Page):
-        if isinstance(page, View) and page.pages:
-            return page.pages[0]
-        else:
-            return page
+        return page.pages[0] if isinstance(page, View) and page.pages else page
 
     # -------------------------------------------------------------------------
 

@@ -91,7 +91,7 @@ def _load_twemoji_index(paths):
 
             # Add icon to index
             name = f":{icon}:"
-            if not any(name in index[key] for key in ["emoji", "aliases"]):
+            if all(name not in index[key] for key in ["emoji", "aliases"]):
                 index["emoji"][name] = { "name": name, "path": file }
 
     # Return index

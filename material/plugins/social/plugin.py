@@ -85,14 +85,10 @@ class SocialPlugin(BasePlugin[SocialConfig]):
         # Move color options
         if self.config.cards_color:
 
-            # Move background color to new option
-            value = self.config.cards_color.get("fill")
-            if value:
+            if value := self.config.cards_color.get("fill"):
                 self.config.cards_layout_options["background_color"] = value
 
-            # Move color to new option
-            value = self.config.cards_color.get("text")
-            if value:
+            if value := self.config.cards_color.get("text"):
                 self.config.cards_layout_options["color"] = value
 
         # Move font family to new option
@@ -149,11 +145,7 @@ class SocialPlugin(BasePlugin[SocialConfig]):
         file, _ = os.path.splitext(page.file.src_path)
 
         # Resolve path of image
-        path = "{}.png".format(os.path.join(
-            config.site_dir,
-            directory,
-            file
-        ))
+        path = f"{os.path.join(config.site_dir, directory, file)}.png"
 
         # Resolve path of image directory
         directory = os.path.dirname(path)
@@ -165,10 +157,10 @@ class SocialPlugin(BasePlugin[SocialConfig]):
 
         # Compute page title and description
         title = page.meta.get("title", page.title)
-        description = config.site_description or ""
         if "description" in page.meta:
             description = page.meta["description"]
-
+        else:
+            description = config.site_description or ""
         # Check type of meta title - see https://t.ly/m1Us
         if not isinstance(title, str):
             log.error(
@@ -320,17 +312,12 @@ class SocialPlugin(BasePlugin[SocialConfig]):
         if not page.is_homepage:
             title = f"{title} - {config.site_name}"
 
-        # Compute page description
-        description = config.site_description
         if "description" in page.meta:
             description = page.meta["description"]
-
+        else:
+            description = config.site_description
         # Resolve image URL
-        url = "{}.png".format(posixpath.join(
-            config.site_url or ".",
-            directory,
-            file
-        ))
+        url = f'{posixpath.join(config.site_url or ".", directory, file)}.png'
 
         # Ensure forward slashes
         url = url.replace(os.path.sep, "/")
@@ -387,11 +374,7 @@ class SocialPlugin(BasePlugin[SocialConfig]):
 
         # Handle icons
         icon = theme["icon"] or {}
-        if "logo" in icon and icon["logo"]:
-            logo = icon["logo"]
-        else:
-            logo = "material/library"
-
+        logo = icon["logo"] if "logo" in icon and icon["logo"] else "material/library"
         # Resolve path of package
         base = os.path.abspath(os.path.join(
             os.path.dirname(__file__),
@@ -445,19 +428,17 @@ class SocialPlugin(BasePlugin[SocialConfig]):
             for file in files:
                 # Map available font weights to file paths
                 fname = os.path.join(currentpath, file)
-                match = re.search(filename_regex, fname)
-                if match:
+                if match := re.search(filename_regex, fname):
                     font[match.group(1)] = fname
 
         # If none found, fetch from Google and try again
-        if len(font) == 0:
+        if not font:
             self._load_font_from_google(name)
             for currentpath, folders, files in os.walk(self.cache):
                 for file in files:
                     # Map available font weights to file paths
                     fname = os.path.join(currentpath, file)
-                    match = re.search(filename_regex, fname)
-                    if match:
+                    if match := re.search(filename_regex, fname):
                         font[match.group(1)] = fname
 
         # Return available font weights with fallback
