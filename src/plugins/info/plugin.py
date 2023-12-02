@@ -147,12 +147,12 @@ class InfoPlugin(BasePlugin[InfoConfig]):
             )
 
             # Retrieve list of processed files
-            for a in f.filelist:
-                files.append("".join([
-                    Fore.LIGHTBLACK_EX, a.filename, " ",
-                    _size(a.compress_size)
-                ]))
-
+            files.extend(
+                "".join(
+                    [Fore.LIGHTBLACK_EX, a.filename, " ", _size(a.compress_size)]
+                )
+                for a in f.filelist
+            )
         # Finally, write archive to disk
         buffer = archive.getbuffer()
         with open(f"{example}.zip", "wb") as f:
@@ -194,7 +194,7 @@ class InfoPlugin(BasePlugin[InfoConfig]):
         print(Style.NORMAL)
         print(f"  Please update from {have} to {need}.")
         print(Style.RESET_ALL)
-        print(f"  pip install --upgrade --force-reinstall mkdocs-material")
+        print("  pip install --upgrade --force-reinstall mkdocs-material")
         print(Style.NORMAL)
 
         # Exit, unless explicitly told not to

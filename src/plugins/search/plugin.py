@@ -180,11 +180,10 @@ class SearchIndex:
 
     # Override: graceful indexing and additional fields
     def create_entry_for_section(self, section, toc, url, page):
-        item = self._find_toc_by_id(toc, section.id)
-        if item:
+        if item := self._find_toc_by_id(toc, section.id):
             url = url + item.url
         elif section.id:
-            url = url + "#" + section.id
+            url = f"{url}#{section.id}"
 
         # Set page title as section title if none was given, which happens when
         # the first headline in a Markdown document is not a h1 headline. Also,
@@ -322,10 +321,7 @@ class Element:
 
     # Support comparison (compare by tag only)
     def __eq__(self, other):
-        if other is Element:
-            return self.tag == other.tag
-        else:
-            return self.tag == other
+        return self.tag == other.tag if other is Element else self.tag == other
 
     # Support set operations
     def __hash__(self):
@@ -356,10 +352,7 @@ class Section:
 
     # String representation
     def __repr__(self):
-        if self.id:
-            return "#".join([self.el.tag, self.id])
-        else:
-            return self.el.tag
+        return "#".join([self.el.tag, self.id]) if self.id else self.el.tag
 
     # Check whether the section should be excluded
     def is_excluded(self):
@@ -381,19 +374,10 @@ class Parser(HTMLParser):
         super().__init__(*args, **kwargs)
 
         # Tags to skip
-        self.skip = set([
-            "object",                  # Objects
-            "script",                  # Scripts
-            "style"                    # Styles
-        ])
+        self.skip = {"object", "script", "style"}
 
         # Tags to keep
-        self.keep = set([
-            "p",                       # Paragraphs
-            "code", "pre",             # Code blocks
-            "li", "ol", "ul",          # Lists
-            "sub", "sup"               # Sub- and superscripts
-        ])
+        self.keep = {"p", "code", "pre", "li", "ol", "ul", "sub", "sup"}
 
         # Current context and section
         self.context = []
@@ -408,16 +392,16 @@ class Parser(HTMLParser):
 
         # Ignore self-closing tags
         el = Element(tag, attrs)
-        if not tag in void:
+        if tag not in void:
             self.context.append(el)
         else:
             return
 
         # Handle heading
         if tag in ([f"h{x}" for x in range(1, 7)]):
-            depth = len(self.context)
             if "id" in attrs:
 
+                depth = len(self.context)
                 # Ensure top-level section
                 if tag != "h1" and not self.data:
                     self.section = Section(Element("hx"), depth)
@@ -517,13 +501,8 @@ class Parser(HTMLParser):
         if self.skip.intersection(self.context):
             return
 
-        # Collapse whitespace in non-pre contexts
-        if not "pre" in self.context:
-            if not data.isspace():
-                data = data.replace("\n", " ")
-            else:
-                data = " "
-
+        if "pre" not in self.context:
+            data = data.replace("\n", " ") if not data.isspace() else " "
         # Handle preface - ensure top-level section
         if not self.section:
             self.section = Section(Element("hx"))
@@ -563,19 +542,19 @@ class Parser(HTMLParser):
 log = logging.getLogger("mkdocs.material.search")
 
 # Tags that are self-closing
-void = set([
-    "area",                            # Image map areas
-    "base",                            # Document base
-    "br",                              # Line breaks
-    "col",                             # Table columns
-    "embed",                           # External content
-    "hr",                              # Horizontal rules
-    "img",                             # Images
-    "input",                           # Input fields
-    "link",                            # Links
-    "meta",                            # Metadata
-    "param",                           # External parameters
-    "source",                          # Image source sets
-    "track",                           # Text track
-    "wbr"                              # Line break opportunities
-])
+void = {
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+}
